@@ -13,4 +13,9 @@ public class LinkedinController implements BaseController {
     public String publishLinkedinNow(){
         return "Linkedin post done !!";
     }
+
+    @PostMapping(value = LINKEDIN + "/schedule-post")
+    public String schedulePostLinkedin(){
+        return "Linkedin post scheduled done !!";
+    }
 }

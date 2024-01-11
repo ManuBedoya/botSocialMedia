@@ -13,4 +13,9 @@ public class XController implements BaseController {
     public String publishXNow(){
         return "X post done!!";
     }
+
+    @PostMapping(value = X + "/schedule-post")
+    public String schedulePostX(){
+        return "X post scheduled done!!";
+    }
 }
