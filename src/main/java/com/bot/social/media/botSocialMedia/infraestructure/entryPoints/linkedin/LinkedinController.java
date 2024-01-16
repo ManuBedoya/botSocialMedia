@@ -4,7 +4,7 @@ import com.bot.social.media.botSocialMedia.infraestructure.entryPoints.BaseContr
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import static com.bot.social.media.botSocialMedia.domain.utils.Constants.LINKEDIN;
+import static com.bot.social.media.botSocialMedia.domain.usecase.utils.Constants.LINKEDIN;
 
 @RestController
 public class LinkedinController implements BaseController {
