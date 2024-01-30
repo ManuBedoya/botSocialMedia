@@ -3,6 +3,7 @@ package com.bot.social.media.botSocialMedia.infraestructure.entryPoints.instagra
 
 import com.bot.social.media.botSocialMedia.domain.usecase.instagram.InstagramUseCaseImpl;
 import com.bot.social.media.botSocialMedia.infraestructure.entryPoints.BaseController;
+import com.github.instagram4j.instagram4j.exceptions.IGLoginException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -33,5 +34,11 @@ public class InstagramController implements BaseController{
     public String test() throws IOException {
         List<List<Object>> values = instagramUseCase.test();
         return values.toString() + "done !!";
+    }
+
+    @GetMapping(path = "testPublishOnIg")
+    public String testPublishIg() throws IGLoginException {
+        instagramUseCase.testPublishOnIg();
+        return "done !!";
     }
 }
