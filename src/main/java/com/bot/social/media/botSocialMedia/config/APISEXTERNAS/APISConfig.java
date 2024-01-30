@@ -1,6 +1,5 @@
-package com.bot.social.media.botSocialMedia.config.googlesheets;
+package com.bot.social.media.botSocialMedia.config.APISEXTERNAS;
 
-import com.bot.social.media.botSocialMedia.domain.usecase.instagram.InstagramUseCaseImpl;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
 import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
@@ -12,6 +11,8 @@ import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.sheets.v4.Sheets;
 import com.google.api.services.sheets.v4.SheetsScopes;
+import com.twitter.clientlib.TwitterCredentialsBearer;
+import com.twitter.clientlib.api.TwitterApi;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,7 +22,7 @@ import java.security.GeneralSecurityException;
 import java.util.List;
 
 @Configuration
-public class GoogleAuthorizeUtil {
+public class APISConfig {
 
     private static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
     private static final String CREDENTIALS = "/credentials.json";
@@ -31,11 +32,19 @@ public class GoogleAuthorizeUtil {
     private static String GMAIL_ACCOUNT;
 
     @Bean
+    public TwitterApi getInstanceTwitter(){
+        TwitterApi twitterApi = new TwitterApi();
+        TwitterCredentialsBearer credentials = new TwitterCredentialsBearer("");
+        twitterApi.setTwitterCredentials(credentials);
+        return twitterApi;
+    }
+
+    @Bean
     public static Sheets getSheets() throws IOException,
             GeneralSecurityException {
         List<String> scopes = List.of(SheetsScopes.SPREADSHEETS);
 
-        InputStream in = GoogleAuthorizeUtil.class.getResourceAsStream(CREDENTIALS);
+        InputStream in = APISConfig.class.getResourceAsStream(CREDENTIALS);
 
         if (in == null){
             throw new FileNotFoundException("Las credenciales no fueron encontradas");
@@ -56,10 +65,5 @@ public class GoogleAuthorizeUtil {
         return new Sheets.Builder(GoogleNetHttpTransport.newTrustedTransport(), JSON_FACTORY, credential)
                 .setApplicationName("botSocialMedia")
                 .build();
-    }
-
-    @Bean
-    public InstagramUseCaseImpl createInstagramUseCaseImpl(Sheets sheets){
-        return new InstagramUseCaseImpl(sheets);
     }
 }
