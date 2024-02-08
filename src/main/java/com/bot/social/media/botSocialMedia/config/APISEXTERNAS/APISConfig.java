@@ -11,9 +11,11 @@ import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.sheets.v4.Sheets;
 import com.google.api.services.sheets.v4.SheetsScopes;
+import com.google.auth.oauth2.GoogleCredentials;
+import com.google.cloud.storage.Storage;
+import com.google.cloud.storage.StorageOptions;
 import com.twitter.clientlib.TwitterCredentialsBearer;
 import com.twitter.clientlib.api.TwitterApi;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -26,10 +28,8 @@ public class APISConfig {
 
     private static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
     private static final String CREDENTIALS = "/credentials.json";
+    private final String CREDENTIALS_FIREBASE = "/credentials_firebase.json";
     private static final String TOKENS_DIRECTORY = "tokens";
-
-    @Value("${gmail.account}")
-    private static String GMAIL_ACCOUNT;
 
     @Bean
     public TwitterApi getInstanceTwitter(){
@@ -60,10 +60,21 @@ public class APISConfig {
 
         LocalServerReceiver localServerReceiver = new LocalServerReceiver.Builder().setPort(8888).build();
         Credential credential = new AuthorizationCodeInstalledApp(flow, localServerReceiver)
-                .authorize(GMAIL_ACCOUNT);
+                .authorize(System.getenv("GMAILACCOUNT"));
 
         return new Sheets.Builder(GoogleNetHttpTransport.newTrustedTransport(), JSON_FACTORY, credential)
                 .setApplicationName("botSocialMedia")
                 .build();
+    }
+
+    @Bean
+    public Storage getFirebase() throws IOException {
+        //FileInputStream serviceAccount = new FileInputStream(CREDENTIALS_FIREBASE);
+        InputStream serviceAccount = APISConfig.class.getResourceAsStream(CREDENTIALS_FIREBASE);
+        if (serviceAccount == null){
+            throw new FileNotFoundException("Las credenciales no fueron encontradas");
+        }
+        return StorageOptions.newBuilder()
+                .setCredentials(GoogleCredentials.fromStream(serviceAccount)).build().getService();
     }
 }

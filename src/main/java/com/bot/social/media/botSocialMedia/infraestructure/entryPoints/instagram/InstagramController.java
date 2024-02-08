@@ -1,16 +1,14 @@
 package com.bot.social.media.botSocialMedia.infraestructure.entryPoints.instagram;
 
 
+import com.bot.social.media.botSocialMedia.domain.model.PostModel;
 import com.bot.social.media.botSocialMedia.domain.usecase.instagram.InstagramUseCaseImpl;
 import com.bot.social.media.botSocialMedia.infraestructure.entryPoints.BaseController;
-import com.github.instagram4j.instagram4j.exceptions.IGLoginException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.io.IOException;
-import java.util.List;
 
 import static com.bot.social.media.botSocialMedia.domain.usecase.utils.Constants.INSTAGRAM;
 
@@ -30,15 +28,14 @@ public class InstagramController implements BaseController{
         return "instagram post scheduled done !!";
     }
 
-    @GetMapping(path = "test")
-    public String test() throws IOException {
-        List<List<Object>> values = instagramUseCase.test();
-        return values.toString() + "done !!";
+    @GetMapping(path = "test", produces = MediaType.APPLICATION_JSON_VALUE)
+    public PostModel test() {
+        return instagramUseCase.test();
     }
 
-    @GetMapping(path = "testPublishOnIg")
-    public String testPublishIg() throws IGLoginException {
-        instagramUseCase.testPublishOnIg();
-        return "done !!";
+    @GetMapping(path = "testFirebase", produces = MediaType.APPLICATION_JSON_VALUE)
+    public String testDownload(){
+        instagramUseCase.testGetImageFromFirebase();
+        return "Downloaded!!";
     }
 }

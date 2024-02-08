@@ -39,4 +39,5 @@ out/
 tokens
 credentials.json
 .env
+credentials_firebase.json
 
