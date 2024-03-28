@@ -35,7 +35,7 @@ public class InstagramUseCaseImpl {
     private String password;
 
     private WebDriver driver;
-    public PostModel test(){
+    public PostModel publishNow(){
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMATTER);
         final String range = "instagram!A2:C2";
         try {
@@ -59,6 +59,7 @@ public class InstagramUseCaseImpl {
                 requests.add(new Request().setDeleteRange(deleteRangeRequest));
                 BatchUpdateSpreadsheetRequest body = new BatchUpdateSpreadsheetRequest().setRequests(requests);
                 sheets.spreadsheets().batchUpdate(SPREADSHEETID, body).execute();
+                publishOnIg( post.getImageUrl(), post.getDescription());
                 return post;
             }
         }catch (IOException ex){
@@ -70,17 +71,27 @@ public class InstagramUseCaseImpl {
     public void publishOnIg(String imageUrl, String description) throws IGLoginException {
 
         IGClient client = IGClient.builder().username(username).password(password).login();
-
-        client.actions().timeline().uploadPhoto(new File(imageUrl), description)
+        getImageFromFirebase(imageUrl);
+        client.actions().timeline().uploadPhoto(new File("src/main/resources/" + imageUrl), description)
                 .thenAccept(response -> {
             System.out.println("Foto subida correctamente");
+            deleteImage(imageUrl);
         }).join();
     }
 
-    public void testGetImageFromFirebase(){
+    public void getImageFromFirebase(String nameFile){
 
-        Blob blob = storage.get(BlobId.of(System.getenv("BUCKETFIREBASE"), "test.jpg"));
-        blob.downloadTo(Path.of(new File("src/main/resources/test.jpg").getAbsolutePath()));
+        Blob blob = storage.get(BlobId.of(System.getenv("BUCKETFIREBASE"), nameFile));
+        blob.downloadTo(Path.of(new File("src/main/resources/"+nameFile).getAbsolutePath()));
+    }
+
+    public void deleteImage(String nameFile){
+        File image = new File("src/main/resources/"+nameFile);
+        if (image.delete()){
+            System.out.print("Se elimino imagen");
+        }else{
+            System.out.print("NO se elimino la imagen");
+        }
     }
 
 }
