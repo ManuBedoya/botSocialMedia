@@ -5,17 +5,13 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
+import java.util.List;
 
-@Builder(toBuilder = true)
 @Data
+@Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class PostModel {
+public class ListCountModel {
 
-    private String state;
-    private String description;
-    private String imageUrl;
-    private LocalDate date;
-
+    private List<String> exceptionCounts;
 }

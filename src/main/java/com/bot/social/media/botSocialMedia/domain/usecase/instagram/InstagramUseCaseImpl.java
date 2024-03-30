@@ -2,7 +2,9 @@ package com.bot.social.media.botSocialMedia.domain.usecase.instagram;
 
 import com.bot.social.media.botSocialMedia.domain.model.PostModel;
 import com.github.instagram4j.instagram4j.IGClient;
+import com.github.instagram4j.instagram4j.actions.users.UserAction;
 import com.github.instagram4j.instagram4j.exceptions.IGLoginException;
+import com.github.instagram4j.instagram4j.responses.feed.FeedUsersResponse;
 import com.google.api.services.sheets.v4.Sheets;
 import com.google.api.services.sheets.v4.model.*;
 import com.google.cloud.storage.Blob;
@@ -19,6 +21,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import static com.bot.social.media.botSocialMedia.domain.usecase.utils.Constants.DATE_FORMATTER;
 import static com.bot.social.media.botSocialMedia.domain.usecase.utils.Constants.SPREADSHEETID;
@@ -47,24 +50,27 @@ public class InstagramUseCaseImpl {
                 PostModel post = PostModel.builder().description(values.get(0).toString()).imageUrl(values.get(1).toString())
                         .date(LocalDate.parse(values.get(2).toString(), formatter)).build();
 
-                DeleteRangeRequest deleteRangeRequest = new DeleteRangeRequest()
-                        .setRange(new GridRange()
-                                .setSheetId(0)
-                                .setStartRowIndex(1)
-                                .setEndRowIndex(2)
-                                .setStartColumnIndex(0)
-                                .setEndColumnIndex(3))
-                        .setShiftDimension("ROWS");
-                List<Request> requests = new ArrayList<>();
-                requests.add(new Request().setDeleteRange(deleteRangeRequest));
-                BatchUpdateSpreadsheetRequest body = new BatchUpdateSpreadsheetRequest().setRequests(requests);
-                sheets.spreadsheets().batchUpdate(SPREADSHEETID, body).execute();
-                publishOnIg( post.getImageUrl(), post.getDescription());
-                return post;
+                if(post.getDate().isBefore(LocalDate.now()) || post.getDate().isEqual(LocalDate.now())){
+                    DeleteRangeRequest deleteRangeRequest = new DeleteRangeRequest()
+                            .setRange(new GridRange()
+                                    .setSheetId(0)
+                                    .setStartRowIndex(1)
+                                    .setEndRowIndex(2)
+                                    .setStartColumnIndex(0)
+                                    .setEndColumnIndex(3))
+                            .setShiftDimension("ROWS");
+                    List<Request> requests = new ArrayList<>();
+                    requests.add(new Request().setDeleteRange(deleteRangeRequest));
+                    BatchUpdateSpreadsheetRequest body = new BatchUpdateSpreadsheetRequest().setRequests(requests);
+                    sheets.spreadsheets().batchUpdate(SPREADSHEETID, body).execute();
+                    publishOnIg( post.getImageUrl(), post.getDescription());
+                    return post;
+                }
             }
         }catch (IOException ex){
             System.out.println("Errr:" + ex);
         }
+        System.out.print("No se publicó nada");
         return PostModel.builder().build();
     }
 
@@ -91,6 +97,23 @@ public class InstagramUseCaseImpl {
             System.out.print("Se elimino imagen");
         }else{
             System.out.print("NO se elimino la imagen");
+        }
+    }
+
+    public String unfollow(List<String> exceptionCounts) throws IGLoginException, ExecutionException, InterruptedException {
+        IGClient client = IGClient.builder().username(username).password(password).login();
+        List<FeedUsersResponse> followers = new UserAction(client, client.getActions().account().currentUser().get().getUser()).followersFeed().stream().toList();
+        List<FeedUsersResponse> following = new UserAction(client, client.getActions().account().currentUser().get().getUser()).followingFeed().stream().toList();
+        int numFollowers = followers.stream().mapToInt(aux -> aux.getUsers().size()).sum();
+        int numFollwing = following.stream().mapToInt(aux -> aux.getUsers().size()).sum();
+        System.out.println(exceptionCounts.toString());
+        System.out.printf("Followers: %d y Following: %d", numFollowers, numFollwing);
+        if (followers.stream().anyMatch(aux->aux.getUsers().stream().anyMatch(user -> user.getUsername().equals("terecomiendo.tr")))){
+            return "Nos seguimos!! Nice";
+        }else if (following.stream().anyMatch(aux->aux.getUsers().stream().anyMatch(user -> exceptionCounts.contains(user.getUsername())))){
+           return "No me sigue!! pero no se va al carajo, tiene buen contenido!";
+        }else{
+            return "Que se vaya al carajo";
         }
     }
 
