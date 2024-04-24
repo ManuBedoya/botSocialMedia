@@ -4,6 +4,7 @@ import com.bot.social.media.botSocialMedia.domain.model.PostModel;
 import com.github.instagram4j.instagram4j.IGClient;
 import com.github.instagram4j.instagram4j.actions.users.UserAction;
 import com.github.instagram4j.instagram4j.exceptions.IGLoginException;
+import com.github.instagram4j.instagram4j.models.user.Profile;
 import com.github.instagram4j.instagram4j.responses.feed.FeedUsersResponse;
 import com.google.api.services.sheets.v4.Sheets;
 import com.google.api.services.sheets.v4.model.*;
@@ -22,6 +23,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static com.bot.social.media.botSocialMedia.domain.usecase.utils.Constants.DATE_FORMATTER;
 import static com.bot.social.media.botSocialMedia.domain.usecase.utils.Constants.SPREADSHEETID;
@@ -108,13 +110,25 @@ public class InstagramUseCaseImpl {
         int numFollwing = following.stream().mapToInt(aux -> aux.getUsers().size()).sum();
         System.out.println(exceptionCounts.toString());
         System.out.printf("Followers: %d y Following: %d", numFollowers, numFollwing);
-        if (followers.stream().anyMatch(aux->aux.getUsers().stream().anyMatch(user -> user.getUsername().equals("terecomiendo.tr")))){
-            return "Nos seguimos!! Nice";
-        }else if (following.stream().anyMatch(aux->aux.getUsers().stream().anyMatch(user -> exceptionCounts.contains(user.getUsername())))){
-           return "No me sigue!! pero no se va al carajo, tiene buen contenido!";
-        }else{
-            return "Que se vaya al carajo";
-        }
+        List<String> eliminarUsuarios = new ArrayList();
+        List<String> followersFinal = new ArrayList();
+        List<String> followingFinal = new ArrayList();
+
+        followers.forEach(aux -> aux.getUsers().forEach(user -> followersFinal.add(user.getUsername())));
+        following.forEach(aux -> aux.getUsers().forEach(user -> followingFinal.add(user.getUsername())));
+
+        followingFinal.forEach(username -> {
+            if(followersFinal.contains(username)){
+                System.out.println("Nos seguimos");
+            }else if (exceptionCounts.contains(username)){
+                System.out.println("No lo sigue pero me gusta el contenido");
+            }else{
+                System.out.println("No me sigue, al carajo");
+                eliminarUsuarios.add(username);
+            }
+        });
+        System.out.println("###################" + eliminarUsuarios.size() + "$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
+        return eliminarUsuarios.toString();
     }
 
 }
