@@ -33,14 +33,14 @@ La aplicación maneja las siguientes herramientas, librerias, y tecnologia relev
 * ./gradlew bootRun
 
 ### **Notas:**
-* Debe crear una hoja de calculo
+* Debe crear una hoja de calculo en google sheets
 * Debe crear una aplicación en googleSheets para configurarla en el proyecto,link guia https://developers.google.com/sheets/api/quickstart/java?hl=es-419
 * Debe crear storage en FIREBASE y configurarlo en el proyecto, link guia https://www.baeldung.com/spring-fcm
 * Debe tener las siguientes variables de entorno para funcionamiento del proyecto : 
   * USERNAMEIG=<nombre_de_usuario_instagram>
   * PASSWORDIG=<contraseña_instagram>
   * GMAILACCOUNT=<correo_con_el_que_creo_aplicacion_google_sheet>
-  * BUCKETFIREBASE=<correo_con_el_que_creo_aplicacion_firebase>
+  * BUCKETFIREBASE=<direccion_del_bucket_firebase> (sin el gs://)
   * SPREADSHEETS=<ID_Hoja_de_calculo_creada>
 
 ## <a name="using-endpoints"></a> Uso de endpoints
