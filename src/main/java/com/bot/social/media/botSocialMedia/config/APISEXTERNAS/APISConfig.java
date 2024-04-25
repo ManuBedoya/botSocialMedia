@@ -14,8 +14,6 @@ import com.google.api.services.sheets.v4.SheetsScopes;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.StorageOptions;
-import com.twitter.clientlib.TwitterCredentialsBearer;
-import com.twitter.clientlib.api.TwitterApi;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -30,14 +28,6 @@ public class APISConfig {
     private static final String CREDENTIALS = "/credentials.json";
     private final String CREDENTIALS_FIREBASE = "/credentials_firebase.json";
     private static final String TOKENS_DIRECTORY = "tokens";
-
-    @Bean
-    public TwitterApi getInstanceTwitter(){
-        TwitterApi twitterApi = new TwitterApi();
-        TwitterCredentialsBearer credentials = new TwitterCredentialsBearer("");
-        twitterApi.setTwitterCredentials(credentials);
-        return twitterApi;
-    }
 
     @Bean
     public static Sheets getSheets() throws IOException,

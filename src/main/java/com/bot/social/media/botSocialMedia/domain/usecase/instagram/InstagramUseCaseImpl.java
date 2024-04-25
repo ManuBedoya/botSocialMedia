@@ -12,7 +12,6 @@ import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.Storage;
 import lombok.RequiredArgsConstructor;
-import org.openqa.selenium.WebDriver;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.io.File;
@@ -38,7 +37,6 @@ public class InstagramUseCaseImpl {
     @Value("${password.ig}")
     private String password;
 
-    private WebDriver driver;
     public void publishNow(){
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMATTER);
         final String range = "instagram!A2:C2";
@@ -127,19 +125,17 @@ public class InstagramUseCaseImpl {
                 eliminarUsuarios.add(username.split(",")[1]);
             }
         });
-        Integer[] cont = new Integer[]{0};
         eliminarUsuarios.forEach(pkUsuario -> {
             FriendshipsActionRequest request = new FriendshipsActionRequest(Long.parseLong(pkUsuario), FriendshipsActionRequest.FriendshipsAction.DESTROY);
             client.sendRequest(request).thenAccept(response -> {
                if (response.getStatus().equals("ok")){
                    System.out.println("Usuario eliminado " + pkUsuario);
-                   cont[0] = cont[0] + 1;
                }else{
                    System.out.println("Fallo el unfollow " + pkUsuario);
                }
             });
         });
-        return "Usuarios eliminados: " + cont[0];
+        return "Usuarios eliminados: " + eliminarUsuarios.size();
     }
 
 }
