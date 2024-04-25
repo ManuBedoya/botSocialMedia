@@ -55,7 +55,7 @@ La aplicación maneja las siguientes herramientas, librerias, y tecnologia relev
 ```
 
 {
-    "exceptionCounts" : ["username1", "username2", "username2"....]
+    "exceptionCounts" : ["username1", "username2", "username3"....]
 }
 
 ```
@@ -74,7 +74,7 @@ La aplicación maneja las siguientes herramientas, librerias, y tecnologia relev
 
 {
     "description": "<descripcion_del_post>",
-    "imageUrl": "<nombre_de_la_imagen_en_firebase>.jpg",
+    "imageUrl": "<nombre_de_la_imagen_en_firebase>.jpg"
 }
 
 ```
