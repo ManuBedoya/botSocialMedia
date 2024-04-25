@@ -34,8 +34,8 @@ La aplicación maneja las siguientes herramientas, librerias, y tecnologia relev
 
 ### **Notas:**
 * Debe crear una hoja de calculo en google sheets
-* Debe crear una aplicación en googleSheets para configurarla en el proyecto,link guia https://developers.google.com/sheets/api/quickstart/java?hl=es-419
-* Debe crear storage en FIREBASE y configurarlo en el proyecto, link guia https://www.baeldung.com/spring-fcm
+* Debe crear una aplicación en googleSheets y añadir el archivo de credenciales con el nombre credentials.json en src/main/resources en el proyecto,link guia https://developers.google.com/sheets/api/quickstart/java?hl=es-419
+* Debe crear storage en FIREBASE y  añadir el archivo de credenciales con el nombre credentials_firebase.json en src/main/resources en el proyecto, link guia https://www.baeldung.com/spring-fcm
 * Debe tener las siguientes variables de entorno para funcionamiento del proyecto : 
   * USERNAMEIG=<nombre_de_usuario_instagram>
   * PASSWORDIG=<contraseña_instagram>
