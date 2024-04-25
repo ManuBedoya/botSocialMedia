@@ -4,7 +4,7 @@ import com.bot.social.media.botSocialMedia.domain.model.PostModel;
 import com.github.instagram4j.instagram4j.IGClient;
 import com.github.instagram4j.instagram4j.actions.users.UserAction;
 import com.github.instagram4j.instagram4j.exceptions.IGLoginException;
-import com.github.instagram4j.instagram4j.models.user.Profile;
+import com.github.instagram4j.instagram4j.requests.friendships.FriendshipsActionRequest;
 import com.github.instagram4j.instagram4j.responses.feed.FeedUsersResponse;
 import com.google.api.services.sheets.v4.Sheets;
 import com.google.api.services.sheets.v4.model.*;
@@ -23,7 +23,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.atomic.AtomicReference;
 
 import static com.bot.social.media.botSocialMedia.domain.usecase.utils.Constants.DATE_FORMATTER;
 import static com.bot.social.media.botSocialMedia.domain.usecase.utils.Constants.SPREADSHEETID;
@@ -40,7 +39,7 @@ public class InstagramUseCaseImpl {
     private String password;
 
     private WebDriver driver;
-    public PostModel publishNow(){
+    public void publishNow(){
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMATTER);
         final String range = "instagram!A2:C2";
         try {
@@ -66,14 +65,14 @@ public class InstagramUseCaseImpl {
                     BatchUpdateSpreadsheetRequest body = new BatchUpdateSpreadsheetRequest().setRequests(requests);
                     sheets.spreadsheets().batchUpdate(SPREADSHEETID, body).execute();
                     publishOnIg( post.getImageUrl(), post.getDescription());
-                    return post;
+                    return;
                 }
             }
         }catch (IOException ex){
             System.out.println("Errr:" + ex);
         }
         System.out.print("No se publicó nada");
-        return PostModel.builder().build();
+        PostModel.builder().build();
     }
 
     public void publishOnIg(String imageUrl, String description) throws IGLoginException {
@@ -109,26 +108,38 @@ public class InstagramUseCaseImpl {
         int numFollowers = followers.stream().mapToInt(aux -> aux.getUsers().size()).sum();
         int numFollwing = following.stream().mapToInt(aux -> aux.getUsers().size()).sum();
         System.out.println(exceptionCounts.toString());
-        System.out.printf("Followers: %d y Following: %d", numFollowers, numFollwing);
+        System.out.printf("Followers: %d y Following: %d\n", numFollowers, numFollwing);
         List<String> eliminarUsuarios = new ArrayList();
         List<String> followersFinal = new ArrayList();
         List<String> followingFinal = new ArrayList();
 
         followers.forEach(aux -> aux.getUsers().forEach(user -> followersFinal.add(user.getUsername())));
-        following.forEach(aux -> aux.getUsers().forEach(user -> followingFinal.add(user.getUsername())));
+        following.forEach(aux -> aux.getUsers().forEach(user -> followingFinal.add(user.getUsername()+","+user.getPk())));
 
         followingFinal.forEach(username -> {
-            if(followersFinal.contains(username)){
-                System.out.println("Nos seguimos");
-            }else if (exceptionCounts.contains(username)){
-                System.out.println("No lo sigue pero me gusta el contenido");
+            String usr = username.split(",")[0];
+            if(followersFinal.contains(usr)){
+                System.out.println(usr +" -> Nos seguimos");
+            }else if (exceptionCounts.contains(usr)){
+                System.out.println(usr + " -> No me sigue pero me gusta el contenido");
             }else{
-                System.out.println("No me sigue, al carajo");
-                eliminarUsuarios.add(username);
+                System.out.println(usr + " -> No me sigue, Dejar de seguir");
+                eliminarUsuarios.add(username.split(",")[1]);
             }
         });
-        System.out.println("###################" + eliminarUsuarios.size() + "$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
-        return eliminarUsuarios.toString();
+        Integer[] cont = new Integer[]{0};
+        eliminarUsuarios.forEach(pkUsuario -> {
+            FriendshipsActionRequest request = new FriendshipsActionRequest(Long.parseLong(pkUsuario), FriendshipsActionRequest.FriendshipsAction.DESTROY);
+            client.sendRequest(request).thenAccept(response -> {
+               if (response.getStatus().equals("ok")){
+                   System.out.println("Usuario eliminado " + pkUsuario);
+                   cont[0] = cont[0] + 1;
+               }else{
+                   System.out.println("Fallo el unfollow " + pkUsuario);
+               }
+            });
+        });
+        return "Usuarios eliminados: " + cont[0];
     }
 
 }
